@@ -1,0 +1,15 @@
+services:
+  yocto:
+    build:
+      context: ./Entorno
+      args:
+        # Puedes cambiar la contraseña por defecto si lo necesitas
+        YOCTO_PASS: yocto
+    image: damiannogueiras/yocto-env:latest
+    container_name: yocto-minimal
+    volumes:
+      # Monta el directorio actual del proyecto en el workdir del contenedor
+      - ./yocto_projects:/home/yoctouser/yocto_projects
+    working_dir: /home/yoctouser/yocto_projects
+    # Mantiene el contenedor corriendo para poder hacer 'exec' en él
+    command: tail -f /dev/null

@@ -24,12 +24,19 @@ El proceso se divide en las siguientes fases:
 **Pasos**:
 
 1.  **Iniciar el Contenedor Docker**:
-    *   Verifica que puedes iniciar sesión en tu contenedor Docker proporcionado.
-    *   `docker run -it <nombre-de-tu-imagen-docker>`
+    *   `docker run -it <nombre-de-tu-imagen-docker>` o `docker-compose up`
 
-2.  **Verificar la Estructura de Capas (Layers)**:
+1.1 **Clonar el repositorio de Poky**:
     *   Dentro del contenedor, navega al directorio de tu proyecto Yocto.
-    *   Ejecuta `bitbake-layers show-layers` para confirmar que todas tus capas (`meta-*`) están siendo reconocidas por BitBake.
+    *   Ejecuta `git clone git://git.yoctoproject.org/poky -b kirkstone`
+
+1.2 **Inicializar el entorno de construcción de Yocto**:
+    *   Navega al directorio poky que acabas de clonar y luego ejecuta el script de inicialización:
+    *   Ejecuta `source oe-init-build-env`
+    *   Esto creará un directorio `build` en el que se realizará la construcción de la imagen.
+
+1.3 **Chequeear layers**:
+    *   Ejecuta `yocto-check-layer-wrapper` para verificar que todos los layers estén correctamente configurados.
 
 ### Fase 2: Construcción de Imagen para Pruebas
 
