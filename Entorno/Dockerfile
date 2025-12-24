@@ -10,25 +10,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update \
 && apt install -y --no-install-recommends software-properties-common ca-certificates \
 && add-apt-repository -y universe \
-&& apt update \
-&& apt install -y --no-install-recommends \
-    gawk \
-    wget \
-    git \
-    diffstat \
-    unzip \
-    texinfo \
-    gcc \
-    build-essential \
-    python3 \
-    python3-pip \
-    iputils-ping \
-    libsdl1.2-dev \
-    xterm \
-    locales \
-    realpath \
-    sudo \
-    && apt clean && rm -rf /var/lib/apt/lists/*
+&& apt update
 
 # Configurar locales
 RUN locale-gen es_ES.UTF-8
