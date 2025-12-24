@@ -9,8 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN add-apt-repository -y universe \
 && apt update \
-&& apt install -y --no-install-recommends software-properties-common ca-certificates \
-&& apt clean
+&& apt install -y --no-install-recommends ca-certificates \
 
 # Crear un usuario no-root para trabajar con Yocto
 ARG YOCTO_PASS
