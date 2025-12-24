@@ -4,7 +4,10 @@ FROM ubuntu:22.04
 ENV TZ=Europe/Madrid
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update && apt-get install -y \
+# Evitar prompts interactivos durante la instalación
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gawk \
     wget \
     git \
@@ -26,7 +29,9 @@ RUN apt-get update && apt-get install -y \
     xterm \
     locales \
     realpath \
-    sudo
+    sudo \
+    tzdata \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Configurar locales
 RUN locale-gen es_ES.UTF-8
