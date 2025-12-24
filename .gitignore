@@ -1,0 +1,3 @@
+# Ignorar archivos de entorno que contienen secretos
+.env
+.gemini
