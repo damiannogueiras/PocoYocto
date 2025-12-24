@@ -61,6 +61,12 @@ docker run -it --name yocto_build -v ~/yocto_projects:/home/yoctouser/yocto_proj
 
 Se ha configurado una GitHub Action para construir y publicar automáticamente la imagen en Docker Hub cuando se crea una etiqueta (tag) en la rama `entorno`.
 
+### Configuración de la Action
+
+En el directorio `Entorno/.github/workflows/` se encuentra el archivo `docker-publish.yml` que define la Action.
+
+Básicamente configura un ubuntu y lanza el Dockerfile para luego subirla a Docker Hub.
+
 ### Configuración de Secretos en GitHub
 
 Para que la Action funcione, debes configurar los siguientes **Repository Secrets** en GitHub (`Settings > Secrets and variables > Actions`):
