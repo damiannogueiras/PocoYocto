@@ -72,8 +72,8 @@ Para que la Action funcione, debes configurar los siguientes **Repository Secret
 ### Cómo disparar la publicación
 
 1.  Asegúrate de estar en la rama `entorno`.
-2.  Crea una etiqueta que empiece por `v` y súbela:
+2.  Crea una etiqueta que empiece por `img_` y súbela:
     ```bash
-    git tag v1.0
-    git push origin v1.0
+    git tag img_1.0
+    git push origin img_1.0
     ```
