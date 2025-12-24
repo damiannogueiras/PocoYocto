@@ -7,7 +7,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Evitar prompts interactivos durante la instalación
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt update \
+&& apt install -y --no-install-recommends software-properties-common ca-certificates \
+&& add-apt-repository -y universe \
+&& apt update \
+&& apt install -y --no-install-recommends \
     gawk \
     wget \
     git \
@@ -16,22 +20,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     texinfo \
     gcc \
     build-essential \
-    chrpath \
-    socat \
-    cpio \
     python3 \
     python3-pip \
-    python3-pexpect \
-    xz-utils \
-    debianutils \
     iputils-ping \
     libsdl1.2-dev \
     xterm \
     locales \
     realpath \
     sudo \
-    tzdata \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Configurar locales
 RUN locale-gen es_ES.UTF-8
