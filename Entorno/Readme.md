@@ -56,3 +56,30 @@ docker run -it --name yocto_build -v ~/yocto_projects:/home/yoctouser/yocto_proj
 *   `-v ~/yocto_projects:/home/yoctouser/yocto_projects`: Monta una carpeta local (`~/yocto_projects`) dentro del contenedor. **Todo tu trabajo se guardará aquí**.
 *   `yocto_env`: El nombre de la imagen que quieres usar.
 *   `/bin/bash`: Inicia una sesión de terminal dentro del contenedor.
+
+## 3. Despliegue Automatizado (GitHub Actions)
+
+Se ha configurado una GitHub Action para construir y publicar automáticamente la imagen en Docker Hub cuando se crea una etiqueta (tag) en la rama `entorno`.
+
+### Configuración de la Action
+
+En el directorio `Entorno/.github/workflows/` se encuentra el archivo `docker-publish.yml` que define la Action.
+
+Básicamente configura un ubuntu y lanza el Dockerfile para luego subirla a Docker Hub.
+
+### Configuración de Secretos en GitHub
+
+Para que la Action funcione, debes configurar los siguientes **Repository Secrets** en GitHub (`Settings > Secrets and variables > Actions`):
+
+1.  `DOCKER_HUB_USERNAME`: Tu nombre de usuario de Docker Hub.
+2.  `DOCKER_HUB_TOKEN`: Un Access Token generado en Docker Hub (no uses tu contraseña real).
+3.  `YOCTO_PASS`: La contraseña que se usará para el usuario `yoctouser` dentro de la imagen publicada.
+
+### Cómo disparar la publicación
+
+1.  Asegúrate de estar en la rama `entorno`.
+2.  Crea una etiqueta que empiece por `img_` y súbela:
+    ```bash
+    git tag img_1.0
+    git push origin img_1.0
+    ```
