@@ -7,15 +7,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Evitar prompts interactivos durante la instalación
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt update \
+RUN add-apt-repository -y universe \
+&& apt update \
 && apt install -y --no-install-recommends software-properties-common ca-certificates \
-&& add-apt-repository -y universe \
-&& apt update
-
-# Configurar locales
-ENV LANG es_ES.UTF-8
-ENV LANGUAGE es_ES:es
-ENV LC_ALL es_ES.UTF-8
+&& apt clean
 
 # Crear un usuario no-root para trabajar con Yocto
 ARG YOCTO_PASS
