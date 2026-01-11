@@ -24,7 +24,7 @@ El proceso se divide en las siguientes fases:
 **Pasos**:
 
 1.  **Iniciar el Contenedor Docker**:
-    *   `docker run -it <nombre-de-tu-imagen-docker>` o `docker-compose up`
+    *   `docker run -it <nombre-de-tu-imagen-docker>` o `docker-compose up -d`
 
 1.1 **Clonar el repositorio de Poky**:
     *   Dentro del contenedor, navega al directorio de tu proyecto Yocto.
@@ -45,14 +45,19 @@ El proceso se divide en las siguientes fases:
 **Pasos**:
 
 1.  **Configurar la Build para Pruebas**:
+    *   Copiar el fichero /home/yoctouser/yocto_projects/poky/meta-poky/conf/local.conf.sample a build/conf/local.conf
     *   Edita el fichero `conf/local.conf` de tu directorio de build.
     *   Asegúrate de que las siguientes variables estén presentes para incluir los paquetes de `ptest` (package testing):
         ```
         EXTRA_IMAGE_FEATURES += " ptest-pkgs"
         ```
-    *   Asegúrate de que la variable `TMPDIR` esté configurada correctamente para evitar problemas de permisos:
+    *   Asegúrate de que la variable `TMPDIR` esté configurada correctamente para evitar problemas de permisos y distinción de may y min de MacOS:
         ```
         TMPDIR = "${HOME}/tmp"
+        ```
+    *   Tipo de paquetes
+        ```
+        PACKAGE_CLASSES ?= "package_deb"
         ```
 
 2.  **Lanzar la Construcción (Build)**:
