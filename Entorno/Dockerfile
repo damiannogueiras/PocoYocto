@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends 
 RUN apt install -y gawk wget git diffstat texinfo gcc build-essential chrpath socat cpio python3 python3-pip unzip xz-utils debianutils iputils-ping xterm sudo
 RUN apt install -y python3-pexpect libsdl1.2-dev locales node-fs.realpath tzdata file lz4 zstd liblz4-tool
+RUN apt install -y emacs-nox nano net-tools
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Configurar locales tienen que estar en ingles para evitar problemas con algunas herramientas de Yocto
