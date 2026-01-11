@@ -24,5 +24,14 @@ ENV LC_ALL=es_ES.UTF-8
 # Crear un usuario no-root para trabajar con Yocto
 ARG YOCTO_PASS
 RUN useradd -m -s /bin/bash yoctouser && echo "yoctouser:${YOCTO_PASS}" | chpasswd && adduser yoctouser sudo
+
+# Configurar sudo sin contraseña para yoctouser (más seguro que ahora)
+RUN echo "yoctouser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/yoctouser && \
+    chmod 0440 /etc/sudoers.d/yoctouser
+
+# Pre-crear directorio de caché
+RUN mkdir -p /home/yoctouser/.yocto-cache && \
+    chown -R yoctouser:yoctouser /home/yoctouser
+
 USER yoctouser
 WORKDIR /home/yoctouser/yocto_projects

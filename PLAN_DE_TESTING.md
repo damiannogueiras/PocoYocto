@@ -50,6 +50,10 @@ El proceso se divide en las siguientes fases:
         ```
         EXTRA_IMAGE_FEATURES += " ptest-pkgs"
         ```
+    *   Asegúrate de que la variable `TMPDIR` esté configurada correctamente para evitar problemas de permisos:
+        ```
+        TMPDIR = "${HOME}/tmp"
+        ```
 
 2.  **Lanzar la Construcción (Build)**:
     *   Desde el directorio de build, ejecuta el comando `bitbake` para construir tu imagen deseada. Se recomienda empezar con una imagen base como `core-image-minimal` o `core-image-base`.

@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../Desktop/awesome-copilot"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.agent.md": "chatagent",
+			"*.instructions.md": "instructions",
+			"*.prompt.md": "prompt"
+		}
+	}
+}
