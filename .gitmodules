@@ -1,7 +1,3 @@
-[submodule "poky"]
-	path = poky
-	url = git://git.yoctoproject.org/poky
-	branch = kirkstone
 [submodule "metas/meta-openembedded"]
 	path = metas/meta-openembedded
 	url = git://git.openembedded.org/meta-openembedded
@@ -10,3 +6,7 @@
 	path = metas/meta-raspberrypi
 	url = https://github.com/agherzan/meta-raspberrypi.git
 	branch = kirkstone
+[submodule "PocoYocto-env"]
+	path = PocoYocto-env
+	url = https://github.com/damiannogueiras/PocoYocto-env.git
+	branch = main
