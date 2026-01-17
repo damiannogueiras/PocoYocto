@@ -14,10 +14,10 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 This repository is a teaching/demo Yocto Project setup targeting macOS hosts. It consists of:
 
-- `Entorno/`: Docker-based build environment definition for Yocto (Ubuntu 22.04 container, Spanish locale, non-root `yoctouser`).
+- `PocoYocto-env/`: Docker-based build environment definition for Yocto (Ubuntu 22.04 container, Spanish locale, non-root `yoctouser`).
 - `yocto_projects/`: Workspace mounted into the container. Currently contains an upstream `poky` checkout with the standard Yocto/Poky layout.
 - `Manual/`: Official Yocto Project documentation in PDF form for reference.
-- `PLAN_DE_TESTING.md`: End-to-end test plan for validating generated images (manual and automated `ptest`).
+- `README.md`: End-to-end test plan for validating generated images.
 
 Most project documentation is in Spanish; prefer Spanish technical language unless the user clearly uses another language.
 
@@ -73,9 +73,9 @@ Adjust the bind mount path if you want to point at this repo’s `yocto_projects
 Inside the container, the main Yocto workspace is under `yocto_projects/poky`, which is an upstream Poky integration repository. Key pieces (see the `README*.md` files in that directory):
 
 - `bitbake/`: The BitBake build tool used by Yocto to execute tasks and manage the dependency graph.
-- `meta/`: The `openembedded-core` layer (recipes, classes, and configuration forming the core of the distribution).
+
 - `meta-poky/` and `meta-yocto-bsp/`: Yocto Project reference distribution policy and BSP layers for supported hardware.
-- `meta-selftest/` and `meta-skeleton/`: Self-tests and example layers/templates.
+
 - `documentation/`: Yocto/Poky documentation sources (separate from your `Manual/` PDF, which is for local reading).
 - `oe-init-build-env`: Shell script that configures the build environment and creates/enters a `build/` directory.
 
@@ -86,6 +86,11 @@ A typical customization flow in this repo is:
 3. Configure `conf/local.conf` and `conf/bblayers.conf` in that `build/` directory to select MACHINE, image types, and layers.
 4. Use `bitbake` to build images and SDKs.
 5. Use QEMU to boot and test the images, and `ptest` for automated package-level testing.
+
+## Layers
+
+- `metas/`: The `openembedded-core` layer (recipes, classes, and configuration forming the core of the distribution) and others public layers.
+- `metas-propias/`: Self-tests and example layers/templates.
 
 ## Core commands: build, run, and test
 

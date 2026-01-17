@@ -1,1 +1,0 @@
-# Plantilla configuración nuevo sistema
