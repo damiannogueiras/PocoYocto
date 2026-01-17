@@ -24,11 +24,7 @@ El proceso se divide en las siguientes fases:
 **Pasos**:
 
 1.  **Iniciar el Contenedor Docker**:
-    *   `docker run -it <nombre-de-tu-imagen-docker>` o `docker-compose up -d`
-
-1.1 **Clonar el repositorio de Poky**:
-    *   Dentro del contenedor, navega al directorio de tu proyecto Yocto.
-    *   Ejecuta `git clone git://git.yoctoproject.org/poky -b kirkstone`
+    *   `docker-compose up -d`
 
 1.2 **Inicializar el entorno de construcción de Yocto**:
     *   Navega al directorio poky que acabas de clonar y luego ejecuta el script de inicialización:

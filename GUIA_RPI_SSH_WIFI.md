@@ -1,12 +1,13 @@
-# Guía: Imagen Yocto para Raspberry Pi Zero W con SSH y WiFi
+# Guía: Imagen Yocto para Raspberry Pi 4 (64-bit) con SSH y WiFi
 
-Objetivo: construir una imagen Yocto para **Raspberry Pi Zero W** que:
+Objetivo: construir una imagen Yocto para **Raspberry Pi 4 (64-bit)** que:
 
 - Arranque en **modo solo consola** (sin entorno gráfico).
 - Habilite **SSH** desde el primer arranque (con usuario `root` sin contraseña).
 - Se conecte automáticamente a la WiFi con:
   - SSID: `wifi`
   - Contraseña: `perlitalagatita`
+- Compile los menos paquetes posibles y limpie la caché durante la construcción.
 
 La guía está escrita para que un agente de IA pueda ejecutarla paso a paso.
 
@@ -17,20 +18,22 @@ La guía está escrita para que un agente de IA pueda ejecutarla paso a paso.
 - Ya tienes este repositorio clonado en el host (macOS).
 - Tienes Docker instalado y funcionando.
 - El repositorio contiene:
-  - `Entorno/Dockerfile` y/o `docker-compose.yml`
+  - `PocoYocto-env/Dockerfile` y `docker-compose.yml`
   - `yocto_projects/poky` (checkout de Poky).
 - Todo el trabajo de Yocto se hace **dentro del contenedor**, no directamente en macOS.
+- El directorio `yocto_projects` se corresponde con el `/home/yoctouser/yocto_projects` del contenedor
+- Todos los ficheros generados por Yocto estan en un volumen Docker `yocto-output`
 
 Si algo de esto no es cierto, ajusta la ruta o los comandos según tu entorno.
 
 ---
 
-## 1. Arrancar el entorno de desarrollo (host macOS)
+## 1. Arrancar el entorno de desarrollo
 
 ### 1.1. Ir al directorio del repositorio
 
 ```bash
-cd /Users/mini/Damian/Yocto
+cd ~/PocoYocto
 ```
 
 ### 1.2. Levantar el contenedor con Docker Compose
@@ -40,12 +43,12 @@ docker compose up -d
 ```
 
 - Si falla, revisa que exista un `docker-compose.yml` en este directorio.
-- El contenedor resultante se asume que se llama `yocto-minimal` (ajusta el nombre si es distinto).
+- El contenedor resultante se asume que se llama `pocoyocto` (ajusta el nombre si es distinto).
 
 ### 1.3. Entrar al contenedor
 
 ```bash
-docker exec -it yocto-minimal bash
+docker exec -it pocoyocto bash
 ```
 
 Dentro del contenedor, el directorio de trabajo será:
@@ -58,9 +61,7 @@ cd /home/yoctouser/yocto_projects
 
 ## 2. Preparar Poky y las capas necesarias
 
-Todo lo que sigue es **dentro del contenedor**.
-
-### 2.1. Asegurarse de que existe `poky`
+### 2.1. Asegurarse de que existe `poky` (dentro contenedor)
 
 ```bash
 cd /home/yoctouser/yocto_projects
@@ -69,15 +70,15 @@ ls
 
 Debe aparecer un directorio `poky`. Si no existe, habría que clonarlo (no se detalla aquí porque ya debería venir preparado).
 
-### 2.2. Clonar la capa `meta-raspberrypi`
+### 2.2. Clonar como submodulo la capa `meta-raspberrypi` (fuera del contenedor, directorio 'metas')
 
 ```bash
-cd /home/yoctouser/yocto_projects
-git clone https://github.com/agherzan/meta-raspberrypi.git
+cd ./metas
+git submodule add -b kirkstone https://github.com/agherzan/meta-raspberrypi.git
 ```
 
 ---
-
+// TODO hacerlo en el volumen de Docker
 ## 3. Inicializar el directorio de build de Yocto
 
 ### 3.1. Ejecutar `oe-init-build-env`
@@ -129,40 +130,46 @@ EOF
 Archivo: `conf/local.conf`.
 
 Este es el archivo más importante. Acá le decimos a Yocto:
-- Qué máquina es (Raspberry Pi Zero W).
+- Qué máquina es (Raspberry Pi 4 64-bit).
 - Que habilite SSH.
 - Que instale lo necesario para WiFi.
 - Dónde guardar los archivos temporales (sin quilombos de permisos).
 - Que habilite systemd como sistema de init.
+- Que borre el trabajo intermedio para ahorrar espacio.
 
 ```bash
 cd /home/yoctouser/yocto_projects/poky/build
 
 cat > conf/local.conf << 'EOF'
-# ============ MÁQUINA ============
-MACHINE ?= "raspberrypi0-wifi"
+# ============ MÁQUINA ============ 
+# Raspberry Pi 4 de 64 bits
+MACHINE ?= "raspberrypi4-64"
 DISTRO ?= "poky"
 
-# ============ BUILD ============
+# ============ BUILD ============ 
+# Optimización: compilar paquetes como .deb y limpiar el directorio de trabajo después de cada receta
 PACKAGE_CLASSES ?= "package_deb"
+INHERIT += "rm_work"
+
 BB_NUMBER_THREADS ?= "6"
 PARALLEL_MAKE ?= "-j 6"
 TMPDIR = "/tmp/yocto-build"
 
-# ============ IMAGEN: TIPO Y FORMATO ============
+# ============ IMAGEN: TIPO Y FORMATO ============ 
 IMAGE_FSTYPES += "rpi-sdimg"
-IMAGE_FEATURES += "debug-tweaks"
+# Para una imagen mínima, no añadir 'debug-tweaks' a menos que sea necesario para depurar
+# IMAGE_FEATURES += "debug-tweaks"
 
-# ============ SYSTEMD ============
+# ============ SYSTEMD ============ 
 # Habilitar systemd como sistema de init
 DISTRO_FEATURES:append = " systemd"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 
-# ============ SSH: SERVIDOR DROPBEAR (LIGERO) ============
+# ============ SSH: SERVIDOR DROPBEAR (LIGERO) ============ 
 # Esto habilita SSH en la imagen de forma automática
 EXTRA_IMAGE_FEATURES += "ssh-server-dropbear"
 
-# ============ PAQUETES WIFI ============
+# ============ PAQUETES WIFI ============ 
 # Instala todo lo necesario para conectarse a redes WiFi
 IMAGE_INSTALL:append = " \
     wpa-supplicant \
@@ -170,11 +177,11 @@ IMAGE_INSTALL:append = " \
     wifi-config \
 "
 
-# ============ HARDWARE ============
+# ============ HARDWARE ============ 
 # Habilita puerto UART (útil para depuración via consola serie)
 ENABLE_UART = "1"
 
-# ============ CREDENCIALES (para desarrollo, che) ============
+# ============ CREDENCIALES (para desarrollo, che) ============ 
 # Root sin contraseña (cámbialo en producción)
 EXTRA_IMAGE_FEATURES += "allow-empty-password"
 EXTRA_IMAGE_FEATURES += "allow-root-login"
@@ -278,7 +285,7 @@ network={
 EOF
 
 cat > meta-rpi-custom/recipes-connectivity/wifi-config/wifi-config.bb << 'EOF'
-SUMMARY = "Configuración WiFi para Raspberry Pi Zero W"
+SUMMARY = "Configuración WiFi para Raspberry Pi 4"
 LICENSE = "MIT"
 
 SRC_URI = "file://wpa_supplicant.conf \
@@ -359,7 +366,7 @@ Reemplazá el contenido de `wifi-config.bb` con esto:
 
 ```bash
 cat > /home/yoctouser/yocto_projects/poky/build/meta-rpi-custom/recipes-connectivity/wifi-config/wifi-config.bb << 'EOF'
-SUMMARY = "Configuración WiFi para Raspberry Pi Zero W"
+SUMMARY = "Configuración WiFi para Raspberry Pi 4"
 LICENSE = "MIT"
 
 SRC_URI = "file://wpa_supplicant.conf \
@@ -419,7 +426,7 @@ Este paso tardará bastante (especialmente la primera vez, boludo). Andá a toma
 Al terminar, la imagen para SD debería estar en:
 
 ```text
-tmp/deploy/images/raspberrypi0-wifi/core-image-minimal-raspberrypi0-wifi.rpi-sdimg
+tmp/deploy/images/raspberrypi4-64/core-image-minimal-raspberrypi4-64.rpi-sdimg
 ```
 
 ---
@@ -434,7 +441,7 @@ Este paso se hace **fuera del contenedor**, de vuelta en macOS.
 # En el host (no dentro del contenedor):
 cd /Users/mini/Damian/Yocto
 
-docker cp yocto-minimal:/home/yoctouser/yocto_projects/poky/build/tmp/deploy/images/raspberrypi0-wifi/core-image-minimal-raspberrypi0-wifi.rpi-sdimg .
+docker cp yocto-minimal:/home/yoctouser/yocto_projects/poky/build/tmp/deploy/images/raspberrypi4-64/core-image-minimal-raspberrypi4-64.rpi-sdimg .
 ```
 
 ### 10.2. Identificar la tarjeta SD
@@ -456,7 +463,7 @@ diskutil unmountDisk /dev/disk4
 ```bash
 cd /Users/mini/Damian/Yocto
 
-sudo dd if=core-image-minimal-raspberrypi0-wifi.rpi-sdimg of=/dev/rdisk4 bs=4m conv=sync
+sudo dd if=core-image-minimal-raspberrypi4-64.rpi-sdimg of=/dev/rdisk4 bs=4m conv=sync
 sudo sync
 ```
 
@@ -468,7 +475,7 @@ sudo sync
 
 ### 11.1. Arrancar la Raspberry
 
-1. Inserta la SD en la Raspberry Pi Zero W.
+1. Inserta la SD en la Raspberry Pi 4.
 2. Conecta la alimentación.
 3. Espera 1-2 minutos a que:
    - El sistema arranque.
@@ -533,7 +540,7 @@ Si todo está ok, deberías estar dentro sin contraseña.
 2. Clonar `meta-raspberrypi`.
 3. Inicializar build con `oe-init-build-env`.
 4. Configurar `bblayers.conf` (Poky + meta-raspberrypi).
-5. Configurar `local.conf` (máquina, SSH, WiFi).
+5. Configurar `local.conf` (máquina, SSH, WiFi, limpieza).
 6. Crear receta `wifi-config` con wpa_supplicant.conf.
 7. `bitbake core-image-minimal`.
 8. Grabar en SD con `dd`.
