@@ -6,3 +6,7 @@
 	path = PocoYocto-env
 	url = https://github.com/damiannogueiras/PocoYocto-env.git
 	branch = main
+[submodule "metas/meta-raspberrypi"]
+	path = metas/meta-raspberrypi
+	url = git://git.yoctoproject.org/meta-raspberrypi
+	branch = kirkstone
