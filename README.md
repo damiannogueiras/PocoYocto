@@ -1,40 +1,63 @@
-# Plan de Pruebas para Sistema Embebido con Yocto
+# Plan para Sistema Embebido con Yocto
 
-## 1. Introducción
+## Introducción
 
-Este documento describe el plan de pruebas para un sistema embebido generado con el Proyecto Yocto. El objetivo es proporcionar una guía estructurada para verificar la estabilidad, funcionalidad y rendimiento de la imagen del sistema antes de su despliegue.
+Este documento describe el plan crear sistema embebido generado con el Proyecto Yocto. 
 
-## 2. Fases del Plan de Pruebas
+El objetivo es proporcionar una guía estructurada para verificar la estabilidad, funcionalidad y rendimiento de la imagen del sistema antes de su despliegue.
+
+Describe el procedimiento a llevar para la creación de ramas y actualización de ficheros con el fin de mantener varios sistemas embebidos en el mismo repositorio.
+
+## Fases
 
 El proceso se divide en las siguientes fases:
 
-1.  **Configuración del Entorno**: Verificación del contenedor Docker y la estructura de Yocto.
-2.  **Construcción de Imagen para Pruebas**: Generación de una imagen que incluya las herramientas de testing de Yocto.
-3.  **Despliegue y Arranque**: Ejecución de la imagen en un emulador (QEMU) para una validación inicial rápida.
-4.  **Pruebas Manuales Básicas**: Comprobaciones iniciales de funcionamiento del sistema.
-5.  **Pruebas Automatizadas (ptest)**: Ejecución del framework de testing de Yocto.
-6.  **Documentación de Resultados**: Reporte de los hallazgos.
+1. **Configuracion de la rama**: Creación de la rama específica para el sistema deseado
+2. **CLanzamiento del contenedor del Entorno**: Verificación del contenedor Docker y la estructura de Yocto.
+3. **Construcción de Capas**: Generación de las capas necesarias, ya sean las publicas (`metas`) o las personalizadas (`metas-propias`)
+4. **Construcción de Imagen**: Construcción de la imágen
+5. **Documentación de Resultados**: Reporte de los hallazgos.
 
 ---
+### Fase 1: Creación de rama
 
-### Fase 1: Configuración del Entorno
+Desde el commit etiquetado con ´init´, creamos una nueva rama.
+
+Nombre: `bsp/machine-version`
+
+En esta rama haremos toda la configuración y construiremos la imágen.
+
+**Crear/modificar** un `README-machine.md` con las instrucciones de configuración y proceso
+
+Preferiblemente que este fichero pueda ser ejecutado por IA
+
+Para nuevos sistemas, volvemos a crear una rama nueva desde `init`
+
+Si queremos hacer una versión diferente del sistema, la nueva rama la podemos hacer desde la rama del sistema ya creado, asi mantenemos los ficheros.
+
+### Fase 2: Lanzamiento del contenedor Entorno
 
 **Objetivo**: Asegurar que el entorno de desarrollo y construcción esté operativo.
 
+**Contexto**: El entorno está en el repositorio [PocoYocto-env](https://github.com/damiannogueiras/PocoYocto-env.git)
+
 **Pasos**:
 
-1.  **Iniciar el Contenedor Docker**:
-    *   `docker-compose up -d`
+2.1 **Iniciar el Contenedor Docker**:
 
-1.2 **Inicializar el entorno de construcción de Yocto**:
-    *   Navega al directorio poky que acabas de clonar y luego ejecuta el script de inicialización:
+Tenemos el `docker-copmpose.yaml` en el directorio del repositorio (está como un submódulo de git)
+
+Desde este directorio lanzamos: `docker-compose up -d`
+
+2.2 **Inicializar el entorno de construcción de Yocto**:
+    *   Navega al directorio poky (ya está en clonado en la imagen Docker)
     *   Ejecuta `source oe-init-build-env`
     *   Esto creará un directorio `build` en el que se realizará la construcción de la imagen.
 
-1.3 **Chequeear layers**:
+2.3 **Chequeear layers**:
     *   Ejecuta `yocto-check-layer-wrapper` para verificar que todos los layers estén correctamente configurados.
 
-### Fase 2: Construcción de Imagen para Pruebas
+### Fase 2: Construcción de Imagen
 
 **Objetivo**: Generar una imagen del sistema operativo que incluya los paquetes de prueba.
 
