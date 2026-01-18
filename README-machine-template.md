@@ -20,9 +20,13 @@ El propósito es aislar la configuración de la nueva máquina.
 
 Asegura que el entorno de construcción esté operativo.
 
-1.  **Iniciar Contenedor**:
-    - **directorio**: `[ruta/a/PocoYocto-env]`
-    - **comando**: `docker-compose up -d`
+1.  **Configurar e Iniciar Contenedor**:
+   - **directorio**: `[ruta/a/PocoYocto-env]`
+   - **nombre_contenedor**: `[pocoyocto-machine]`
+   - **volumenes**:
+        - Volumen de configuracion: `[conf-machine]:/home/yoctouser/yocto_projects/poky/meta-poky/conf`
+        - Volumen de salida: `[yocto-output-machine]:/home/yoctouser/yocto_output`
+   - **comando**: `docker-compose up -d`
 2.  **Acceder al Contenedor**:
     - **nombre_contenedor**: `[yocto-minimal]`
     - **comando**: `docker exec -it [nombre_contenedor] bash`

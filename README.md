@@ -13,7 +13,7 @@ Describe el procedimiento a llevar para la creación de ramas y actualización d
 El proceso se divide en las siguientes fases:
 
 1. **Configuracion de la rama**: Creación de la rama específica para el sistema deseado
-2. **CLanzamiento del contenedor del Entorno**: Verificación del contenedor Docker y la estructura de Yocto.
+2. **Lanzamiento del contenedor del Entorno**: Verificación del contenedor Docker y la estructura de Yocto.
 3. **Construcción de Capas**: Generación de las capas necesarias, ya sean las publicas (`metas`) o las personalizadas (`metas-propias`)
 4. **Construcción de Imagen**: Construcción de la imágen
 5. **Documentación de Resultados**: Reporte de los hallazgos.
@@ -33,7 +33,7 @@ Preferiblemente que este fichero pueda ser ejecutado por IA
 
 Para nuevos sistemas, volvemos a crear una rama nueva desde `init`
 
-Si queremos hacer una versión diferente del sistema, la nueva rama la podemos hacer desde la rama del sistema ya creado, asi mantenemos los ficheros.
+Si queremos hacer una versión diferente de un sistema ya creado, la nueva rama la podemos hacer desde la rama del sistema ya creado, asi mantenemos los ficheros.
 
 ### Fase 2: Lanzamiento del contenedor Entorno
 
@@ -42,6 +42,11 @@ Si queremos hacer una versión diferente del sistema, la nueva rama la podemos h
 **Contexto**: El entorno está en el repositorio [PocoYocto-env](https://github.com/damiannogueiras/PocoYocto-env.git)
 
 **Pasos**:
+
+2.0 **Configurar Volumenes** `docker-compose.yaml`:
+
+  - Volumen de configuracion: `build-machine:/home/yoctouser/yocto_projects/poky/meta-poky/build`
+  - Volumen de salida: `yocto-output-machine:/home/yoctouser/yocto_output`
 
 2.1 **Iniciar el Contenedor Docker**:
 
