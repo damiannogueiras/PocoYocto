@@ -16,7 +16,10 @@ Esta sección describe los pasos para construir una imagen de Yocto para la **Ra
 
 ### 1. Preparación del Entorno
 
-Asegúrese de que el entorno de Docker esté en ejecución.
+0. Configurar los volumenes para que la configuración y la salida de ficheros queden fuer del contenedor
+    
+   - Volumen de configuracion: conf-machine
+   - Volumes de datos de salida: yocto_output-machine
 
 1.  **Iniciar Contenedor**:
     ```bash
