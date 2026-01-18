@@ -24,16 +24,16 @@ Asegura que el entorno de construcción esté operativo.
    - **directorio**: `[ruta/a/PocoYocto-env]`
    - **nombre_contenedor**: `[pocoyocto-machine]`
    - **volumenes**:
-        - Volumen de configuracion: `[conf-machine]:/home/yoctouser/yocto_projects/poky/meta-poky/conf`
+        - Volumen de configuracion: `[build-machine]:/home/yoctouser/yocto_projects/poky/build`
         - Volumen de salida: `[yocto-output-machine]:/home/yoctouser/yocto_output`
    - **comando**: `docker-compose up -d`
 2.  **Acceder al Contenedor**:
-    - **nombre_contenedor**: `[yocto-minimal]`
+    - **nombre_contenedor**: `[pocoyocto-machine]`
     - **comando**: `docker exec -it [nombre_contenedor] bash`
 3.  **Inicializar Entorno Yocto**:
     - **directorio_poky**: `/home/yoctouser/yocto_projects/poky`
-    - **comando**: `source oe-init-build-env [nombre_build]`
-    - **directorio_build_resultante**: `/home/yoctouser/yocto_projects/poky/[nombre_build]`
+    - **comando**: `source oe-init-build-env`
+    - **directorio_build_resultante**: `/home/yoctouser/yocto_projects/poky/build`
 
 ---
 
