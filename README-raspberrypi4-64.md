@@ -18,8 +18,9 @@ Esta sección describe los pasos para construir una imagen de Yocto para la **Ra
 
 0. Configurar los volumenes para que la configuración y la salida de ficheros queden fuer del contenedor
     
-   - Volumen de configuracion: conf-machine
-   - Volumes de datos de salida: yocto_output-machine
+   - Volumen de build: build-rpi4-64
+   - Volumes de datos de salida: yocto_output-rpi-4-64
+   - nombre: pocoyocto-rpi4-64
 
 1.  **Iniciar Contenedor**:
     ```bash
@@ -31,7 +32,7 @@ Esta sección describe los pasos para construir una imagen de Yocto para la **Ra
     docker exec -it yocto-minimal bash
     ```
 3.  **Inicializar Entorno Yocto**:
-    Se utilizará el directorio `build-rpi4` para la configuración.
+    Se utilizará el directorio `build-rpi4-64` para la configuración.
     ```bash
     cd /home/yoctouser/PocoYocto
     source yocto_projects/poky/oe-init-build-env build-rpi4
@@ -92,56 +93,3 @@ La imagen resultante (`.wic.bz2`) se encontrará en:
 - `df -h` debería mostrar el sistema de archivos.
 
 ---
-
-## Flujo de Trabajo General con Yocto
-
-### Fase 1: Creación de rama
-
-Desde el commit etiquetado con ´init´, creamos una nueva rama.
-
-Nombre: `bsp/machine-version`
-
-En esta rama haremos toda la configuración y construiremos la imágen.
-
-**Crear/modificar** un `README-machine.md` con las instrucciones de configuración y proceso
-
-Preferiblemente que este fichero pueda ser ejecutado por IA
-
-Para nuevos sistemas, volvemos a crear una rama nueva desde `init`
-
-Si queremos hacer una versión diferente del sistema, la nueva rama la podemos hacer desde la rama del sistema ya creado, asi mantenemos los ficheros.
-
-### Fase 2: Construcción de Imagen (General)
-
-**Objetivo**: Generar una imagen del sistema operativo que incluya los paquetes de prueba.
-
-**Pasos**:
-
-1.  **Configurar la Build para Pruebas**:
-    *   Asegúrate de que las siguientes variables estén presentes en `conf/local.conf` para incluir los paquetes de `ptest` (package testing):
-        ```
-        EXTRA_IMAGE_FEATURES += " ptest-pkgs"
-        ```
-
-2.  **Lanzar la Construcción (Build)**:
-    *   Desde el directorio de build, ejecuta el comando `bitbake` para construir tu imagen deseada. Se recomienda empezar con una imagen base como `core-image-minimal` o `core-image-base`.
-        ```
-        bitbake core-image-minimal
-        ```
-
-### Fase 3: Despliegue y Arranque con QEMU
-
-**Objetivo**: Arrancar la imagen generada en un entorno emulado para realizar las primeras pruebas sin necesidad de hardware físico.
-
-**Pasos**:
-
-1.  **Ejecutar QEMU**:
-    *   Yocto incluye un script para facilitar la ejecución con QEMU. Una vez finalizada la build, ejecuta:
-        ```
-        runqemu qemux86-64
-        ```
-        *(Reemplaza `qemux86-64` por la arquitectura de tu `MACHINE` si es diferente, ej: `qemuarm`)*.
-    *   Se abrirá una ventana emulando el arranque de tu sistema. Deberías ver los logs de arranque del kernel y finalmente un prompt de login.
-
-2.  **Login en el Sistema**:
-    *   Por defecto, el usuario es `root` sin contraseña.
