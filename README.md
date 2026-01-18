@@ -50,9 +50,11 @@ Si queremos hacer una versión diferente de un sistema ya creado, la nueva rama 
 
 2.1 **Iniciar el Contenedor Docker**:
 
-Tenemos el `docker-copmpose.yaml` en el directorio del repositorio (está como un submódulo de git)
+Tenemos el `docker-copmpose-template.yaml` en el directorio del repositorio (está como un submódulo de git)
 
-Desde este directorio lanzamos: `docker-compose up -d`
+Lo copiamos en el directo base como `docker-compose.yaml` y lo personalizamos
+
+Lo lanzamos con: `docker-compose up -d`
 
 2.2 **Inicializar el entorno de construcción de Yocto**:
     *   Navega al directorio poky (ya está en clonado en la imagen Docker)

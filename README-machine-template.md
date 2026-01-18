@@ -2,7 +2,8 @@
 
 ## Introducción
 
-Este documento contiene los pasos esquemáticos para configurar, construir y desplegar una imagen de Yocto para el sistema **[nombre_del_sistema]**. Está diseñado para ser interpretado por una IA.
+Este documento contiene los pasos esquemáticos para configurar, construir y desplegar una imagen de Yocto para el
+sistema **[nombre_del_sistema]**. Está diseñado para ser interpretado por una IA.
 
 ---
 
@@ -10,7 +11,8 @@ Este documento contiene los pasos esquemáticos para configurar, construir y des
 
 ## Introducción
 
-Este documento contiene los pasos esquemáticos para configurar, construir y desplegar una imagen de Yocto para el sistema **[nombre_del_sistema]**. Está diseñado para ser interpretado por una IA.
+Este documento contiene los pasos esquemáticos para configurar, construir y desplegar una imagen de Yocto para el
+sistema **[nombre_del_sistema]**. Está diseñado para ser interpretado por una IA.
 
 ---
 
@@ -28,17 +30,24 @@ El propósito es aislar la configuración de la nueva máquina.
 
 Asegura que el entorno de construcción esté operativo.
 
-1.  **Configurar e Iniciar Contenedor**:
-- **directorio**: `[ruta/a/PocoYocto-env]`
-- **nombre_contenedor**: `[pocoyocto-machine]`
-- **volumenes**:
-    - Volumen de configuracion: `[build-machine]:/home/yoctouser/yocto_projects/poky/build`
-    - Volumen de salida: `[yocto-output-machine]:/home/yoctouser/yocto_output`
-- **comando**: `docker-compose up -d`
-2.  **Acceder al Contenedor**:
+1. **Configurar e Iniciar Contenedor**:
+  
+- Copiar `docker-compose-template.yml` al directorio principal como `docker-compose.yaml`
+  
+- Personalizarlo
+
+  - **nombre_contenedor**: `[pocoyocto-machine]`
+  - **volumenes**:
+      - Volumen de configuracion: `[build-machine]:/home/yoctouser/yocto_projects/poky/build`
+      - Volumen de salida: `[yocto-output-machine]:/home/yoctouser/yocto_output`
+      - Al final del archivo los nombres de los `volumes:(...)`
+  - **comando**: `docker-compose up -d`
+
+2. **Acceder al Contenedor**:
     - **nombre_contenedor**: `[pocoyocto-machine]`
     - **comando**: `docker exec -it [nombre_contenedor] bash`
-3.  **Inicializar Entorno Yocto**:
+   
+3. **Inicializar Entorno Yocto**:
     - **directorio_poky**: `/home/yoctouser/yocto_projects/poky`
     - **comando**: `source oe-init-build-env`
     - **directorio_build_resultante**: `/home/yoctouser/yocto_projects/poky/build`
@@ -88,14 +97,16 @@ Instala la imagen en el hardware o la emula.
 - **metodo**: `[QEMU | Hardware]`
 
 #### Si es QEMU:
+
 - **comando**: `runqemu [nombre_maquina]`
 
 #### Si es Hardware:
-1.  **Copiar imagen al host**:
+
+1. **Copiar imagen al host**:
     - **imagen_origen**: `[ruta/a/imagen/en/contenedor.rpi-sdimg]`
     - **destino_host**: `[directorio/local]`
     - **comando**: `docker cp [nombre_contenedor]:[imagen_origen] [destino_host]`
-2.  **Grabar en tarjeta SD**:
+2. **Grabar en tarjeta SD**:
     - **dispositivo**: `[/dev/rdiskX]`
     - **imagen**: `[nombre_de_la_imagen.rpi-sdimg]`
     - **comando**: `sudo dd if=[imagen] of=[dispositivo] bs=4m conv=sync`
