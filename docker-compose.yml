@@ -13,12 +13,17 @@ services:
     # Configuración de terminal interactiva
     stdin_open: true
     tty: true
+
+    # puertos para el toaster
+    ports:
+      - "8000:8000"
     
     # Volúmenes
     volumes:
-      - ../yocto_projects:/home/yoctouser/yocto_projects
+      - ./metas:/home/yoctouser/yocto_projects/metas
+      - ./metas-propias:/home/yoctouser/yocto_projects/metas-propias
       - yocto-output-rpi4-64:/home/yoctouser/yocto_output
-      - build-rpi4-64:/home/yoctouser/yocto_projects/poky/build
+      - build-rpi4-64:/home/yoctouser/yocto_projects/build
 
     working_dir: /home/yoctouser/yocto_projects
     
