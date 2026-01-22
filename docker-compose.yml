@@ -28,7 +28,7 @@ services:
     working_dir: /home/yoctouser/yocto_projects
     
     # Mantiene el contenedor corriendo
-    command: /bin/bash
+    command: /bin/bash -c "cd poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8000 && exec /bin/bash"
     
     # Límites de recursos
     deploy:

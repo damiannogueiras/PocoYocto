@@ -24,18 +24,20 @@ Esta sección describe los pasos para construir una imagen de Yocto para la **Ra
 
 1.  **Iniciar Contenedor**:
     ```bash
-    cd PocoYocto-env
     docker-compose up -d
     ```
 2.  **Acceder al Contenedor**:
     ```bash
-    docker exec -it yocto-minimal bash
+    docker exec -it pocoyocto-rpi4-64 bash
     ```
-3.  **Inicializar Entorno Yocto**:
-    Se utilizará el directorio `build-rpi4-64` para la configuración.
+3.  **Inicializar Entorno Yocto dentro del contenedor**:
+    - **directorio_poky**: `/home/yoctouser/yocto_projects/poky`
+    - **comando**: `source oe-init-build-env`
+    - **directorio_build_resultante**: `/home/yoctouser/yocto_projects/poky/build`
+    Se utilizará el directorio `build` para la configuración.
     ```bash
-    cd /home/yoctouser/PocoYocto
-    source yocto_projects/poky/oe-init-build-env build-rpi4
+    cd /home/yoctouser/yocto_projects/poky
+    source oe-init-build-env
     ```
 
 ### 2. Configuración de Wi-Fi
