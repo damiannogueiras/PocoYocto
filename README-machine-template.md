@@ -20,7 +20,7 @@ sistema **[nombre_del_sistema]**. Está diseñado para ser interpretado por una 
 
 El propósito es aislar la configuración de la nueva máquina.
 
-- **rama_base**: `[init | bsp/nombre_maquina-version]`
+- **rama_base**: `[tag init en main | bsp/nombre_maquina-version]`
 - **nueva_rama**: `bsp/[nombre_maquina]-[nueva_version]`
 - **comando**: `git checkout -b [nueva_rama] [rama_base]`
 
@@ -62,8 +62,8 @@ Define qué capas (layers) se usarán para la construcción.
 - **capas_requeridas**:
     - `[ruta/a/poky/meta]`
     - `[ruta/a/poky/meta-poky]`
-    - `[ruta/a/meta-raspberrypi]`
-    - `[ruta/a/meta-propia-custom]`
+    - `[ruta/a/metas]`
+    - `[ruta/a/metas-propias]`
 
 ---
 
@@ -90,25 +90,15 @@ Genera el artefacto final (.sdimg).
 
 ---
 
-### Fase 6: Despliegue
-
-Instala la imagen en el hardware o la emula.
-
-- **metodo**: `[QEMU | Hardware]`
-
-#### Si es QEMU:
-
-- **comando**: `runqemu [nombre_maquina]`
-
 #### Si es Hardware:
 
 1. **Copiar imagen al host**:
-    - **imagen_origen**: `[ruta/a/imagen/en/contenedor.rpi-sdimg]`
+    - **imagen_origen**: `[/home/yoctouser/yocto_output]`
     - **destino_host**: `[directorio/local]`
     - **comando**: `docker cp [nombre_contenedor]:[imagen_origen] [destino_host]`
 2. **Grabar en tarjeta SD**:
     - **dispositivo**: `[/dev/rdiskX]`
-    - **imagen**: `[nombre_de_la_imagen.rpi-sdimg]`
+    - **imagen**: `[nombre_de_la_imagen]`
     - **comando**: `sudo dd if=[imagen] of=[dispositivo] bs=4m conv=sync`
 
 ---

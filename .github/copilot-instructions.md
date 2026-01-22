@@ -3,227 +3,207 @@
 ## Tono y estilo de comunicación
 
 - **Tono**: Argentino, irónico y desenfadado.
-- **Lenguaje**: Utiliza expresiones coloquiales argentinas (boludo, che, quilombo, chamuyar, etc.). Pero no repites tanto Boludo en todas las frases
+- **Lenguaje**: Utiliza expresiones coloquiales argentinas (boludo, che, quilombo, chamuyar, etc.). Pero no repitas tanto "boludo" en todas las frases.
 - **Actitud**: Mantén una ironía fina y humor absurdo en las respuestas técnicas.
 - **Formalidad**: Menos formal que el tono técnico tradicional, pero sin perder precisión en la información.
 - **Ejemplo**: En lugar de "Debes actualizar el Dockerfile", usa algo como "Boludo, actualiza el Dockerfile que esto no se arregla solo, che".
 
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
-## Repository overview
+## Resumen del repositorio
 
-This repository is a teaching/demo Yocto Project setup targeting macOS hosts. It consists of:
+Este repositorio es una configuración de demostración/enseñanza del Yocto Project. Consiste en:
 
-- `PocoYocto-env/`: Docker-based build environment definition for Yocto (Ubuntu 22.04 container, Spanish locale, non-root `yoctouser`).
-- `yocto_projects/`: Workspace mounted into the container. Currently contains an upstream `poky` checkout with the standard Yocto/Poky layout.
-- `Manual/`: Official Yocto Project documentation in PDF form for reference.
-- `README.md`: End-to-end test plan for validating generated images.
+- `PocoYocto-env/`: Definición del entorno de compilación basado en Docker para Yocto (contenedor Ubuntu 22.04, locale en español, usuario no root `yoctouser`).
+- `yocto_projects/`: Espacio de trabajo montado dentro del contenedor. Actualmente contiene un checkout upstream de `poky` con la disposición estándar de Yocto/Poky.
+- `Manual/`: Documentación oficial del Yocto Project en PDF para referencia.
+- `README.md`: Plan de pruebas end-to-end para validar imágenes generadas.
 
-Most project documentation is in Spanish; prefer Spanish technical language unless the user clearly uses another language.
+La mayor parte de la documentación del proyecto está en español; preferir lenguaje técnico en español salvo que el usuario use otro idioma claramente.
 
-## Development environment (macOS + Docker)
+## Entorno de desarrollo (macOS + Docker)
 
-All Yocto work is expected to happen inside a Docker container, not directly on macOS.
+Todo el trabajo con Yocto se espera que ocurra dentro de un contenedor Docker, no directamente en macOS.
 
-### One-time / infrequent setup
+### Configuración única / poco frecuente
 
-1. Create a `.env` file at the repo root based on the implicit contract in `Entorno/Entorno.md`:
+1. Crea un archivo `.env` en la raíz del repositorio basado en el contrato implícito en `Entorno/Entorno.md`:
    ```bash
    YOCTO_PASS=tu_contraseña_segura
    ```
+### Flujo diario usando Docker Compose 
 
-2. Build the development image (from the repo root):
-   ```bash
-   docker build --build-arg YOCTO_PASS=$(grep YOCTO_PASS .env | cut -d '=' -f2) \
-     -t yocto_env -f Entorno/Dockerfile .
-   ```
+Desde la raíz del repo:
 
-   This produces an Ubuntu 22.04 image with all Yocto build dependencies installed and locale set to `es_ES.UTF-8`.
-
-### Day-to-day workflow using Docker Compose (preferred)
-
-From the repo root:
-
-- Start (or rebuild) the environment container in the background:
+- Inicia (o reconstruye) el contenedor del entorno en segundo plano:
   ```bash
   docker compose up -d
   ```
 
-- Open a shell inside the running container:
+- Abre una shell dentro del contenedor en ejecución:
   ```bash
   docker exec -it yocto-minimal bash
   ```
 
-  The working directory inside the container is `/home/yoctouser/yocto_projects`, which is mapped to `./yocto_projects` on the host. All Yocto sources and build artifacts should live under this tree so they persist.
+  El directorio de trabajo dentro del contenedor es `/home/yoctouser/yocto_projects`, que está mapeado a `./yocto_projects` en el host. Todas las fuentes de Yocto y los artefactos de compilación deben vivir bajo este árbol para que persistan.
 
-### Alternative: manual container run
 
-If you prefer not to use Compose, you can start the same environment manually after building `yocto_env`:
+## Disposición de Yocto / Poky y arquitectura general
 
-```bash
-docker run -it --name yocto_build \
-  -v ~/yocto_projects:/home/yoctouser/yocto_projects \
-  yocto_env /bin/bash
-```
+Dentro del contenedor, el espacio principal de trabajo de Yocto está bajo `yocto_projects/poky`, que es un repositorio de integración upstream de Poky. Piezas clave (ver los archivos `README*.md` en ese directorio):
 
-Adjust the bind mount path if you want to point at this repo’s `yocto_projects` directory instead of `~/yocto_projects`.
+- `bitbake/`: La herramienta BitBake usada por Yocto para ejecutar tareas y administrar el grafo de dependencias.
 
-## Yocto / Poky layout and big-picture architecture
+- `meta-poky/` y `meta-yocto-bsp/`: Política de distribución de referencia de Yocto y capas BSP para hardware soportado.
 
-Inside the container, the main Yocto workspace is under `yocto_projects/poky`, which is an upstream Poky integration repository. Key pieces (see the `README*.md` files in that directory):
+- `documentation/`: Fuentes de documentación de Yocto/Poky (separadas del PDF en `Manual/`).
+- `oe-init-build-env`: Script de shell que configura el entorno de compilación y crea/entra en un directorio `build/`.
 
-- `bitbake/`: The BitBake build tool used by Yocto to execute tasks and manage the dependency graph.
+Un flujo típico de personalización en este repo es:
 
-- `meta-poky/` and `meta-yocto-bsp/`: Yocto Project reference distribution policy and BSP layers for supported hardware.
+1. Usar el entorno Docker para trabajar en `yocto_projects/poky`.
+2. Inicializar un directorio de compilación vía `oe-init-build-env` (que crea `build/`).
+3. Configurar `conf/local.conf` y `conf/bblayers.conf` en ese directorio `build/` para seleccionar MACHINE, tipos de imagen y capas.
+4. Usar `bitbake` para compilar imágenes y SDKs.
+5. Usar QEMU para bootear y probar las imágenes, y `ptest` para pruebas automatizadas a nivel de paquetes.
 
-- `documentation/`: Yocto/Poky documentation sources (separate from your `Manual/` PDF, which is for local reading).
-- `oe-init-build-env`: Shell script that configures the build environment and creates/enters a `build/` directory.
+## Capas
 
-A typical customization flow in this repo is:
+- `metas/`: La capa `openembedded-core` (recetas, clases y configuración que forman el núcleo de la distribución) y otras capas públicas.
+- `metas-propias/`: Tests propios y ejemplos de capas/plantillas.
 
-1. Use the Docker environment to work in `yocto_projects/poky`.
-2. Initialize a build directory via `oe-init-build-env` (which creates `build/`).
-3. Configure `conf/local.conf` and `conf/bblayers.conf` in that `build/` directory to select MACHINE, image types, and layers.
-4. Use `bitbake` to build images and SDKs.
-5. Use QEMU to boot and test the images, and `ptest` for automated package-level testing.
+## Comandos centrales: compilar, ejecutar y probar
 
-## Layers
+Todos los comandos abajo se esperan correr dentro del contenedor (tras `docker exec …` dentro de `yocto-minimal` o contenedor equivalente).
 
-- `metas/`: The `openembedded-core` layer (recipes, classes, and configuration forming the core of the distribution) and others public layers.
-- `metas-propias/`: Self-tests and example layers/templates.
+### Inicializar un entorno de compilación Yocto
 
-## Core commands: build, run, and test
-
-All commands below are expected to be run inside the container (after `docker exec …` into `yocto-minimal` or an equivalent container).
-
-### Initialize a Yocto build environment
-
-From `/home/yoctouser/yocto_projects/poky`:
+Desde `/home/yoctouser/yocto_projects/poky`:
 
 ```bash
 cd /home/yoctouser/yocto_projects/poky
 source oe-init-build-env
-# You are now in the build directory (usually ./build)
+# Ahora estás en el directorio build (usualmente ./build)
 ```
 
-This script exports the necessary environment variables and changes into the build directory. Re-run it in each new shell before invoking `bitbake`.
+Este script exporta las variables de entorno necesarias y cambia al directorio de build. Volvé a ejecutarlo en cada nueva shell antes de invocar `bitbake`.
 
-### Configure image for `ptest`
+### Configurar la imagen para `ptest`
 
-To enable Yocto’s package test (`ptest`) infrastructure in the image, edit `conf/local.conf` in the build directory and ensure:
+Para habilitar la infraestructura de pruebas de paquetes (`ptest`) de Yocto en la imagen, editá `conf/local.conf` en el directorio de build y asegurate de:
 
 ```conf
 EXTRA_IMAGE_FEATURES += " ptest-pkgs"
 TMPDIR = "${HOME}/tmp"
 ```
 
-These settings are taken from `PLAN_DE_TESTING.md` to include `ptest` packages and use a `TMPDIR` under the home directory to avoid permission issues.
+Estas configuraciones se toman de `PLAN_DE_TESTING.md` para incluir paquetes `ptest` y usar un `TMPDIR` bajo el directorio home para evitar problemas de permisos.
 
-### Build a reference image
+### Compilar una imagen de referencia
 
-From the build directory (after sourcing `oe-init-build-env`):
+Desde el directorio de build (después de ejecutar `oe-init-build-env`):
 
 ```bash
 bitbake core-image-minimal
 ```
 
-You can substitute another image recipe (e.g., `core-image-base`) if the build configuration requires it.
+Podés sustituir otra receta de imagen (por ejemplo, `core-image-base`) si la configuración de build lo requiere.
 
-### Sanity-check configured layers
+### Verificación de saneamiento de capas configuradas
 
-`PLAN_DE_TESTING.md` assumes the presence of a layer check helper. To validate layer configuration from within the build environment:
+`PLAN_DE_TESTING.md` asume la presencia de un helper de chequeo de capas. Para validar la configuración de capas desde el entorno de build:
 
 ```bash
 yocto-check-layer-wrapper
 ```
 
-Use this to catch common layer configuration issues before long builds.
+Usalo para detectar problemas comunes de configuración de capas antes de compilar por mucho tiempo.
 
-### Boot an image in QEMU
+### Arrancar una imagen en QEMU
 
-After a successful build, you can boot the generated image with QEMU using the helper script provided by Poky. From the build directory:
+Tras una compilación exitosa, podés arrancar la imagen generada con QEMU usando el script helper provisto por Poky. Desde el directorio de build:
 
 ```bash
 runqemu qemux86-64
 ```
 
-Replace `qemux86-64` with the appropriate `MACHINE` if your configuration uses a different emulator target (e.g., `qemuarm`, `qemuarm64`).
+Reemplazá `qemux86-64` por la `MACHINE` apropiada si tu configuración usa otro objetivo de emulación (p. ej. `qemuarm`, `qemuarm64`).
 
-### Manual smoke tests inside QEMU
+### Pruebas rápidas manuales dentro de QEMU
 
-Once logged into the emulated system (typically as `root` with no password), `PLAN_DE_TESTING.md` suggests a basic smoke-test checklist:
+Una vez logueado en el sistema emulado (típicamente como `root` sin contraseña), `PLAN_DE_TESTING.md` sugiere una lista básica de chequeos rápidos:
 
-- Kernel and boot logs:
+- Logs del kernel y arranque:
   ```bash
   dmesg
   ```
-- Filesystem layout and disk usage:
+- Distribución de sistema de archivos y uso de disco:
   ```bash
   df -h
   ```
-- Network status:
+- Estado de la red:
   ```bash
   ip a
   ping 8.8.8.8
   ```
-- Package manager checks (if present in the image):
+- Verificación del gestor de paquetes (si está presente en la imagen):
   ```bash
   opkg list-installed
   ```
 
-### Automated tests with `ptest`
+### Tests automatizados con `ptest`
 
-With `ptest` support enabled in the image and the system booted in QEMU:
+Con `ptest` habilitado en la imagen y el sistema arrancado en QEMU:
 
-- List available `ptest` packages:
+- Listar paquetes `ptest` disponibles:
   ```bash
   ls /usr/lib/*/ptest/
   ```
 
-- Run the full `ptest` suite:
+- Ejecutar la suite completa de `ptest`:
   ```bash
   ptest-runner
   ```
 
-- Run a single package’s tests ("run a single test" equivalent at the package level), e.g. for `coreutils`:
+- Ejecutar los tests de un solo paquete (equivalente a "run a single test" a nivel de paquete), p. ej. para `coreutils`:
   ```bash
   cd /usr/lib/coreutils/ptest/
   ./run-ptest
   ```
 
-Inspect the console output and any `results/` subdirectories for failures and logs.
+Inspeccioná la salida de la consola y cualquier subdirectorio `results/` para fallos y logs.
 
-## CI and Docker image publishing
+## CI y publicación de la imagen Docker
 
-The repo includes a GitHub Actions workflow (`.github/workflows/docker-publish.yml`) which builds and publishes the Docker environment image to Docker Hub when an appropriate tag is pushed.
+El repo incluye un workflow de GitHub Actions (`.github/workflows/docker-publish.yml`) que construye y publica la imagen del entorno Docker en Docker Hub cuando se hace push de una etiqueta apropiada.
 
-According to `Entorno/Entorno.md`:
+Según `PocoYocto-env/Readme.md`:
 
-- Required GitHub repository secrets:
+- Secrets requeridos en GitHub:
   - `DOCKER_HUB_USERNAME`
   - `DOCKER_HUB_TOKEN`
   - `YOCTO_PASS`
-- To trigger a publish from the `entorno` branch:
+- Para disparar una publicación desde la rama `entorno`:
   ```bash
   git tag img_1.0
   git push origin img_1.0
   ```
 
-Update the tag name as needed for new image versions.
+Actualizá el nombre de la etiqueta según sea necesario para nuevas versiones de la imagen.
 
-## Documentation and references
+## Documentación y referencias
 
-- Use `Manual/The Yocto Project ® 5.3 documentation.pdf` as the authoritative reference for Yocto features, variables, and workflows when assisting the user.
-- The `yocto_projects/poky/README*.md` files document the upstream Poky structure, supported architectures, and contribution flows; consult them when questions arise about the internals of Poky, BitBake, or layer organization.
-- `PLAN_DE_TESTING.md` defines the expected end-to-end testing process (environment bring-up, image build, QEMU boot, manual checks, and `ptest` runs); align testing-related guidance with that document.
+- Usá `Manual/The Yocto Project ® 5.3 documentation.pdf` como referencia autorizada para las características, variables y flujos de trabajo de Yocto cuando asistas al usuario.
+- Los archivos `yocto_projects/poky/README*.md` documentan la estructura upstream de Poky, arquitecturas soportadas y flujos de contribución; consultalos cuando surjan preguntas sobre los internos de Poky, BitBake o la organización de capas.
+- `PLAN_DE_TESTING.md` define el proceso de testing end-to-end esperado (levantamiento del entorno, compilación de la imagen, arranque en QEMU, chequeos manuales y ejecución de `ptest`); alineá la guía de testing con ese documento.
 
-## AI / assistant behavior guidelines (from existing rules)
+## Comportamiento del asistente IA (reglas existentes)
 
-This repository’s existing Copilot instructions impose the following expectations on AI assistants:
+Las instrucciones Copilot existentes del repositorio exigen las siguientes expectativas para asistentes IA:
 
-- Act as an expert in building embedded systems using Yocto.
-- Use the PDFs under `Manual/` to guide the user’s development when possible.
-- Assume the development host is a Mac mini (Apple silicon) running macOS, using Docker for isolation.
-- Document multi-step procedures in Markdown, with clear, technically precise, and formal language (Spanish by default).
+- Actuá como experto en construcción de sistemas embebidos usando Yocto.
+- Usá los PDFs en `Manual/` para guiar el desarrollo del usuario cuando sea posible.
+- Asumí que el host de desarrollo es una Mac mini (Apple silicon) corriendo macOS, usando Docker para aislamiento.
+- Documentá procedimientos multi-paso en Markdown, con lenguaje técnico claro, preciso y preferentemente formal (en español por defecto).
 
-When generating answers or code, stay consistent with these expectations while also respecting any explicit instructions from the current user.
+Al generar respuestas o código, mantenete consistente con estas expectativas y respetá cualquier instrucción explícita del usuario.
