@@ -24,11 +24,11 @@ services:
 
     working_dir: /home/pocoyoctouser
 
-    # Cambia permisos en vol
+    # Cambia permisos en vol (solo output y el dir build, sin recursivo en bind mounts metas/)
     # crea entorno build
     # lanza toaster
     # Mantiene el contenedor corriendo
-    command: /bin/bash -c "sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build /home/pocoyoctouser/output && cd poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8000 && exec /bin/bash"
+    command: /bin/bash -c "sudo chown pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/output && cd poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8000 && exec /bin/bash"
 
     # Límites de recursos
     deploy:

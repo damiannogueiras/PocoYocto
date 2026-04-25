@@ -10,3 +10,7 @@
 	path = Wiki
 	url = https://github.com/damiannogueiras/PocoYocto.wiki.git
 	branch = master
+[submodule "metas/meta-raspberrypi"]
+	path = metas/meta-raspberrypi
+	url = https://git.yoctoproject.org/meta-raspberrypi
+	branch = scarthgap
