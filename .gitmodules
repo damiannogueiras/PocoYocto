@@ -6,3 +6,7 @@
 	path = PocoYocto-env
 	url = https://github.com/damiannogueiras/PocoYocto-env.git
 	branch = main
+[submodule "Wiki"]
+	path = Wiki
+	url = https://github.com/damiannogueiras/PocoYocto.wiki.git
+	branch = master

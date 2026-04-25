@@ -8,6 +8,22 @@ El objetivo es proporcionar una guía estructurada para verificar la estabilidad
 
 Describe el procedimiento a llevar para la creación de ramas y actualización de ficheros con el fin de mantener varios sistemas embebidos en el mismo repositorio.
 
+## Ramas y Submódulos
+
+### Ramas
+La rama `main` se mantiene como la rama principal del repositorio, que contiene la configuración base y los archivos comunes para todos los sistemas embebidos.
+
+Para cada sistema embebido se creará una rama específica a partir de `main`.
+Cada rama sigue la nomenclatura `bsp/machine-version`, donde `machine` es el nombre del sistema embebido y `version` es la versión específica del mismo.
+
+El objetivo es tener una rama dedicada para cada sistema embebido, lo que facilita la gestión de configuraciones y construcciones específicas para cada uno.
+
+### Submódulos
+El repositorio incluye submódulos para gestionar dependencias externas. Esto permite mantener el entorno actualizado y consistente para todos los sistemas embebidos:
+- `PocoYocto-env`: Contiene la configuración y scripts necesarios para lanzar el entorno de desarrollo de Yocto.
+- `meta-openembedded`: Contiene capas adicionales de Yocto que pueden ser necesarias para la construcción de imágenes.
+
+
 ## Fases
 
 El proceso se divide en las siguientes fases:
@@ -35,6 +51,7 @@ Para nuevos sistemas, volvemos a crear una rama nueva desde `init`
 
 Si queremos hacer una versión diferente de un sistema ya creado, la nueva rama la podemos hacer desde la rama del sistema ya creado, asi mantenemos los ficheros.
 
+---
 ### Fase 2: Lanzamiento del contenedor Entorno
 
 **Objetivo**: Asegurar que el entorno de desarrollo y construcción esté operativo.
