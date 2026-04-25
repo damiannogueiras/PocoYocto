@@ -70,14 +70,36 @@ build:
   context: ./PocoYocto-env  # Ajustado: el compose vive en la raíz, el Dockerfile está en el submodule
   dockerfile: Dockerfile
 
-### 6. Commit con GitKraken
+### 6. Generar Plan.md
 
-Usá `mcp_gitkraken_git_add_or_commit` para hacer commit de los dos archivos con el mensaje:
+Creá `Plan.md` en la **raíz del repositorio** con el siguiente contenido, adaptado a la máquina concreta:
+
+```markdown
+# Plan — [nombre_maquina]-[nueva_version]
+
+## Hecho
+
+- [x] Crear rama `bsp/[nombre_maquina]-[nueva_version]`
+- [x] Generar `README-machine.md`
+- [x] Generar `docker-compose.yaml`
+
+## Pendiente
+
+- [ ] Levantar contenedor: `docker-compose up -d`
+- [ ] Configurar `bblayers.conf` y `local.conf` dentro del contenedor
+- [ ] Lanzar `bitbake [imagen_objetivo]`
+- [ ] Copiar imagen al host y grabar en SD
+- [ ] Verificar SSH con `ssh [usuario]@<ip>`
+```
+
+### 7. Commit con GitKraken
+
+Usá `mcp_gitkraken_git_add_or_commit` para hacer commit de los tres archivos con el mensaje:
 
 ```
 Inicializar configuración para [nombre_maquina]
 
-Agrega README-machine.md y docker-compose.yaml con la configuración
+Agrega README-machine.md, docker-compose.yaml y Plan.md con la configuración
 base para el sistema [nombre_maquina] en la rama bsp/[nombre_maquina]-[version].
 ```
 
@@ -88,3 +110,33 @@ Al terminar, informá:
 - Los archivos generados con sus paths
 - Los placeholders que quedaron sin completar (si los hay)
 - El próximo paso: `docker-compose up -d` para levantar el entorno según la Fase 2 del README
+
+Además, incluí siempre este aviso sobre Toaster:
+
+---
+
+> **⚠️ Toaster — cómo conectarlo al build**
+>
+> Toaster corre en **http://localhost:8000** pero solo muestra el build si bitbake se lanzó en la **misma sesión** donde se inicializó el entorno. El flujo correcto es:
+>
+> ```bash
+> # Dentro del contenedor (una sola sesión)
+> cd /home/pocoyoctouser/poky
+> source oe-init-build-env ../build
+> source toaster start webport=0.0.0.0:8000
+> bitbake [imagen_objetivo]
+> ```
+>
+> Si lanzás bitbake desde un `docker exec` separado, Toaster **no va a registrar ese build**.
+> En ese caso seguí el progreso por log:
+>
+> ```bash
+> # Progreso (tarea N de M)
+> docker exec [nombre_contenedor] grep "Running task" /home/pocoyoctouser/output/bitbake.log | tail -1
+>
+> # Log en vivo
+> docker exec [nombre_contenedor] tail -f /home/pocoyoctouser/output/bitbake.log
+>
+> # Solo errores
+> docker exec [nombre_contenedor] grep "ERROR" /home/pocoyoctouser/output/bitbake.log
+> ```
