@@ -1,0 +1,73 @@
+services:
+  pocoyocto:
+    build:
+      context: ./PocoYocto-env  # Ajustado: el compose vive en la raíz, el Dockerfile está en el submodule
+      dockerfile: Dockerfile
+      args:
+        YOCTO_PASS: pocoyo
+    image: damiannogueiras/pocoyocto-env:latest
+    container_name: pocoyocto-raspberrypi4-64
+    
+    # Configuración de terminal interactiva
+    stdin_open: true
+    tty: true
+
+    ports:
+      - "8000:8000"
+
+    # Volúmenes
+    volumes:
+      - output-raspberrypi4-64:/home/pocoyoctouser/output
+      - build-raspberrypi4-64:/home/pocoyoctouser/build
+      - ./metas:/home/pocoyoctouser/build/metas
+      - ./metas-propias:/home/pocoyoctouser/build/metas-propias
+
+    working_dir: /home/pocoyoctouser
+
+    # Cambia permisos en vol
+    # crea entorno build
+    # lanza toaster
+    # Mantiene el contenedor corriendo
+    command: /bin/bash -c "sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build /home/pocoyoctouser/output && cd poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8000 && exec /bin/bash"
+
+    # Límites de recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 10G
+        reservations:
+          cpus: '6'
+          memory: 8G
+
+    # Health check
+    healthcheck:
+      test: [ "CMD", "test", "-d", "/home/pocoyoctouser" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Red personalizada
+    networks:
+      - pocoyocto-network
+
+    # Reinicio automático
+    restart: unless-stopped
+
+    # Variables de entorno
+    environment:
+      - YOCTO_BUILD_TYPE=minimal
+      - SSTATE_DIR=/home/pocoyoctouser/output/sstate-cache
+      - DL_DIR=/home/pocoyoctouser/output/downloads
+      - TMPDIR=/home/pocoyoctouser/output/tmp
+
+networks:
+  pocoyocto-network:
+    driver: bridge
+
+volumes:
+  build-raspberrypi4-64:
+    driver: local
+  output-raspberrypi4-64:
+    driver: local
