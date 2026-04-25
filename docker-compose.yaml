@@ -1,0 +1,62 @@
+services:
+  pocoyocto-qemuarm64:
+    build:
+      context: ./PocoYocto-env
+      dockerfile: Dockerfile
+      args:
+        YOCTO_PASS: pocoyo
+    image: damiannogueiras/pocoyocto-env:latest
+    container_name: pocoyocto-qemuarm64
+
+    stdin_open: true
+    tty: true
+
+    ports:
+      - "8001:8001"
+
+    volumes:
+      - output-qemuarm64:/home/pocoyoctouser/output
+      - build-qemuarm64:/home/pocoyoctouser/build
+      - ./metas:/home/pocoyoctouser/build/metas
+      - ./metas-propias:/home/pocoyoctouser/build/metas-propias
+
+    working_dir: /home/pocoyoctouser
+
+    command: /bin/bash -c "sudo chown pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/output && cd poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8001 && exec /bin/bash"
+
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 10G
+        reservations:
+          cpus: '6'
+          memory: 8G
+
+    healthcheck:
+      test: [ "CMD", "test", "-d", "/home/pocoyoctouser" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - pocoyocto-network
+
+    restart: unless-stopped
+
+    environment:
+      - YOCTO_BUILD_TYPE=minimal
+      - SSTATE_DIR=/home/pocoyoctouser/output/sstate-cache
+      - DL_DIR=/home/pocoyoctouser/output/downloads
+      - TMPDIR=/home/pocoyoctouser/output/tmp
+
+networks:
+  pocoyocto-network:
+    driver: bridge
+
+volumes:
+  build-qemuarm64:
+    driver: local
+  output-qemuarm64:
+    driver: local
