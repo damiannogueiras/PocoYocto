@@ -7,9 +7,7 @@ Tu tarea es actuar como un experto en Yocto y generar un plan detallado, paso a 
 Se te dará el nombre de una máquina y un conjunto de requisitos (por ejemplo, "raspberrypi4-64 sin GUI, con SSH y WiFi").
 
 ## Contexto
-Debes usar los siguientes archivos como tus fuentes primarias de información para crear el plan:
-- `README.md`: Provee el flujo de trabajo general y la estructura del proyecto.
-- `README-machine-template.md`: Plantilla para crear documentación específica por máquina.
+Debes usar los archivos del directorio `Wiki` como tus fuentes primarias de información para crear el plan
 
 ## Salida
 - Debes generar un único archivo Markdown llamado `README-<nombre-de-la-maquina>.md`.
