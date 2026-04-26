@@ -89,10 +89,10 @@ bitbake core-image-minimal
 
 ### Fase 6: Verificación en emulador
 
-Para correr el emulador QEMU desde el mismo contenedor y la misma sesión de Yocto:
+Para correr el emulador QEMU desde el mismo contenedor y la misma sesión de Yocto, arrancar usando el `.qemuboot.conf` generado:
 
 ```bash
-runqemu qemuarm64 core-image-minimal nographic slirp
+runqemu /home/pocoyoctouser/build/tmp/deploy/images/qemuarm64/core-image-minimal-qemuarm64.rootfs.qemuboot.conf nographic slirp
 ```
 
 - `nographic`: no usa ventana gráfica.
@@ -106,12 +106,13 @@ ssh -p 2222 admin@localhost
 
 Contraseña: `pinux`
 
+
 ---
 
 ### Notas de Toaster
 
 - Toaster corre en `http://localhost:8001`.
-- El build solo aparece si Toaster se inició en la misma sesión donde se ejecuta `bitbake`.
+- El build solo aparece si la sesión de `bitbake` tiene la misma variable `TOASTER_DIR` que la sesión donde arrancó Toaster.
 - Si no aparece, seguir el log directo con:
 
 ```bash

@@ -69,6 +69,7 @@ ya que el compose se ejecuta desde la raíz del repo y no desde dentro de `PocoY
 build:
   context: ./PocoYocto-env  # Ajustado: el compose vive en la raíz, el Dockerfile está en el submodule
   dockerfile: Dockerfile
+```
 
 ### 6. Commit con GitKraken
 

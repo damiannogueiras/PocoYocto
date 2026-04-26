@@ -13,6 +13,7 @@ services:
 
     ports:
       - "8001:8001"
+      - "2222:2222"
 
     volumes:
       - output-qemuarm64:/home/pocoyoctouser/output
@@ -22,7 +23,7 @@ services:
 
     working_dir: /home/pocoyoctouser
 
-    command: /bin/bash -c "sudo chown pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/output && cd poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8001 && exec /bin/bash"
+    command: /bin/bash -c "sudo chown pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/output && mkdir -p /home/pocoyoctouser/build/toaster_logs && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build/toaster_logs && cd poky && export TOASTER_DIR=/home/pocoyoctouser/build/toaster_logs && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8001 && exec /bin/bash"
 
     deploy:
       resources:
@@ -47,9 +48,12 @@ services:
 
     environment:
       - YOCTO_BUILD_TYPE=minimal
+      - TOASTER_DIR=/home/pocoyoctouser/build/toaster_logs
+      - BB_ENV_PASSTHROUGH_ADDITIONS=TOASTER_DIR
       - SSTATE_DIR=/home/pocoyoctouser/output/sstate-cache
       - DL_DIR=/home/pocoyoctouser/output/downloads
       - TMPDIR=/home/pocoyoctouser/output/tmp
+      - "QB_SLIRP_OPT=-netdev user,id=net0,hostfwd=tcp::2222-:22,tftp=/home/pocoyoctouser/build/tmp/deploy/images/qemuarm64"
 
 networks:
   pocoyocto-network:
