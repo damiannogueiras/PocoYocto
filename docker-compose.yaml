@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         YOCTO_PASS: pocoyo
+        HOST_UID: "${UID:-1000}"
     image: damiannogueiras/pocoyocto-env:latest
     container_name: pocoyocto-qemuarm64
 
@@ -23,7 +24,9 @@ services:
 
     working_dir: /home/pocoyoctouser
 
-    command: /bin/bash -c "sudo chown pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/output && mkdir -p /home/pocoyoctouser/build/toaster_logs && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build/toaster_logs && cd poky && export TOASTER_DIR=/home/pocoyoctouser/build/toaster_logs && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8001 && exec /bin/bash"
+    # chown solo en los volúmenes Docker (output), NO en bind-mounts (metas/)
+    # El UID de pocoyoctouser ya coincide con el del host via build arg HOST_UID
+    command: /bin/bash -c "sudo chown pocoyoctouser:pocoyoctouser /home/pocoyoctouser/build && sudo chown -R pocoyoctouser:pocoyoctouser /home/pocoyoctouser/output && cd /home/pocoyoctouser/poky && source oe-init-build-env ../build && source toaster start webport=0.0.0.0:8001 && exec /bin/bash"
 
     deploy:
       resources:
@@ -52,7 +55,7 @@ services:
       - BB_ENV_PASSTHROUGH_ADDITIONS=TOASTER_DIR
       - SSTATE_DIR=/home/pocoyoctouser/output/sstate-cache
       - DL_DIR=/home/pocoyoctouser/output/downloads
-      - TMPDIR=/home/pocoyoctouser/output/tmp
+      - TMPDIR=/home/pocoyoctouser/build/tmp
       - "QB_SLIRP_OPT=-netdev user,id=net0,hostfwd=tcp::2222-:22,tftp=/home/pocoyoctouser/build/tmp/deploy/images/qemuarm64"
 
 networks:

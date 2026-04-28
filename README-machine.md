@@ -18,6 +18,24 @@ git checkout -b bsp/qemuarm64-v1 init
 
 ---
 
+### Fase 1b: Nueva versión v2
+
+La versión `qemuarm64-v2` hereda todo el comportamiento de `v1` y añade un paquete extra llamado `marcatemporal` que instala:
+
+- un script Python que registra la hora en `/home/admin/marcatemporal.txt`
+- una entrada de cron que se ejecuta cada 15 segundos
+
+La configuración base de `local.conf` no cambia: se usa la misma `MACHINE`, la misma `DISTRO` y la misma imagen mínima, pero el objetivo de BitBake es distinto.
+
+- Nueva rama sugerida: `bsp/qemuarm64-v2`
+- Comando:
+
+```bash
+git checkout -b bsp/qemuarm64-v2 bsp/qemuarm64-v1
+```
+
+---
+
 ### Fase 2: Lanzamiento del contenedor de entorno
 
 1. Copiar o crear el archivo `docker-compose.yaml` en el directorio raíz del repositorio.
@@ -56,6 +74,8 @@ Asegurarse de que `build/conf/bblayers.conf` incluya al menos las siguientes cap
 - `/home/pocoyoctouser/build/metas/meta-openembedded/meta-python`
 - `/home/pocoyoctouser/build/metas-propias/meta-template`
 
+> Importante para `qemuarm64-v2`: esta capa contiene la receta `marcatemporal` y la receta de imagen `core-image-minimal-qemuarm64-v2`.
+
 ---
 
 ### Fase 4: Configuración de la imagen (`local.conf`)
@@ -68,7 +88,10 @@ DISTRO ?= "poky"
 IMAGE_FEATURES = "ssh-server-dropbear"
 INHERIT += "extrausers rm_work"
 EXTRA_USERS_PARAMS = "useradd -m -p '$6$88XM7bshHOZ/Q0bN$yGOqPCkJknC3DQWRbcZxYwZ4HgMUxJlSmv6vItIv3LdFWztQwnzcpQij7Ujs2jl22sNSe1NvUD3ITV0xWXxqD/' admin;"
+INHERIT:remove = "create-spdx"
 ```
+
+- `INHERIT:remove = "create-spdx"`: deshabilita la generación de manifests SPDX. En entornos de demo o desarrollo esto evita fallos intermitentes por artefactos corruptos de builds anteriores.
 
 - `MACHINE = "qemuarm64"`: emulación ARM 64 en QEMU.
 - `ssh-server-dropbear`: habilita acceso SSH.
@@ -87,13 +110,50 @@ bitbake core-image-minimal
 
 ---
 
+### Fase 5b: Construcción de la versión v2
+
+La nueva versión `v2` es igual a la v1 pero añade el script Python y el cron de 15 segundos. Eso se logra con la receta de imagen `core-image-minimal-qemuarm64-v2`, que instala además `python3`, `cronie` y `marcatemporal`.
+
+- El script guarda el timestamp cada 15 segundos en `/home/admin/marcatemporal.txt`.
+- No es necesario cambiar `local.conf` salvo `MACHINE` y `DISTRO` si aún no están definidos.
+- Asegurate de que `meta-template` esté presente en `bblayers.conf`.
+
+```bash
+bitbake core-image-minimal-qemuarm64-v2
+```
+
+
+Verificar que el kernel fue deployado
+
+```bash
+ls /home/pocoyoctouser/build/tmp/deploy/images/qemuarm64/Image
+```
+
+Si no existe, forzar el deploy del kernel (mucho más rápido que una build completa)
+
+```bash
+bitbake virtual/kernel
+```
+---
+
 ### Fase 6: Verificación en emulador
+
+Antes de lanzar QEMU por primera vez, compilar la receta nativa que provee el binario `qemu-system-aarch64`. No se genera automáticamente como parte de la imagen:
+
+```bash
+bitbake qemu-helper-native
+```
 
 Para correr el emulador QEMU desde el mismo contenedor y la misma sesión de Yocto, arrancar usando el `.qemuboot.conf` generado:
 
 ```bash
-runqemu /home/pocoyoctouser/build/tmp/deploy/images/qemuarm64/core-image-minimal-qemuarm64.rootfs.qemuboot.conf nographic slirp
+runqemu /home/pocoyoctouser/build/tmp/deploy/images/qemuarm64/core-image-minimal-qemuarm64-v2-qemuarm64.qemuboot.conf nographic slirp
 ```
+
+> Nota: el nombre del archivo varía según la versión compilada. Verificar el nombre exacto con:
+> ```bash
+> ls /home/pocoyoctouser/build/tmp/deploy/images/qemuarm64/*.qemuboot.conf
+> ```
 
 - `nographic`: no usa ventana gráfica.
 - `slirp`: redirección de red user-mode.
