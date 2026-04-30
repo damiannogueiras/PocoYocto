@@ -10,3 +10,15 @@
 	path = Wiki
 	url = https://github.com/damiannogueiras/PocoYocto.wiki.git
 	branch = master
+[submodule "metas/meta-freescale"]
+	path = metas/meta-freescale
+	url = https://git.yoctoproject.org/meta-freescale
+	branch = scarthgap
+[submodule "metas/meta-freescale-distro"]
+	path = metas/meta-freescale-distro
+	url = https://github.com/Freescale/meta-freescale-distro.git
+	branch = scarthgap
+[submodule "metas/meta-raspberrypi"]
+	path = metas/meta-raspberrypi
+	url = https://github.com/agherzan/meta-raspberrypi.git
+	branch = scarthgap
